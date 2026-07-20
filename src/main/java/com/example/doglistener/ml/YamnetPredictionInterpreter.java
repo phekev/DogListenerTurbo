@@ -15,20 +15,23 @@ public class YamnetPredictionInterpreter {
     private static final float BARK_WEIGHT = 0.3f;
     private static final float BOW_WOW_WEIGHT = 0.1f;
     private static final float YIP_WEIGHT = 0.1f;
+    private final ClassMap classMap;
 
-    public Prediction interpret(
-            float[] logits,
-            List<String> labels
+    public YamnetPredictionInterpreter(
+            ClassMap classMap
     ) {
+        this.classMap = classMap;
+    }
+    public Prediction interpret(float[] logits) {
         validateScores(logits);
 
-        logBarkRelatedScores(logits, labels);
+        logBarkRelatedScores(logits);
 
         Prediction overall =
-                selectBestPrediction(logits, labels);
+                selectBestPrediction(logits);
 
         Prediction bark =
-                computeBarkPrediction(logits, labels);
+                computeBarkPrediction(logits);
 
         System.out.printf(
                 "Overall: %s = %.3f%n",
@@ -46,8 +49,7 @@ public class YamnetPredictionInterpreter {
     }
 
     private Prediction computeBarkPrediction(
-            float[] logits,
-            List<String> labels
+            float[] logits
     ) {
         float dog = 0.0f;
         float bark = 0.0f;
@@ -56,11 +58,11 @@ public class YamnetPredictionInterpreter {
 
         int scoreCount = Math.min(
                 logits.length,
-                labels.size()
+                classMap.size()
         );
 
         for (int index = 0; index < scoreCount; index++) {
-            String label = labels.get(index);
+            String label = classMap.label(index);
             float probability = sigmoid(logits[index]);
 
             switch (label) {
@@ -99,14 +101,18 @@ public class YamnetPredictionInterpreter {
     }
 
     private Prediction selectBestPrediction(
-            float[] logits,
-            List<String> labels
+            float[] logits
     ) {
         int bestIndex = 0;
-        float bestProbability = sigmoid(logits[0]);
+        float bestProbability =
+                sigmoid(logits[0]);
 
-        for (int index = 1; index < logits.length; index++) {
-            float probability = sigmoid(logits[index]);
+        for (int index = 1;
+             index < logits.length;
+             index++) {
+
+            float probability =
+                    sigmoid(logits[index]);
 
             if (probability > bestProbability) {
                 bestProbability = probability;
@@ -114,20 +120,15 @@ public class YamnetPredictionInterpreter {
             }
         }
 
-        String label = bestIndex < labels.size()
-                ? labels.get(bestIndex)
-                : "class-" + bestIndex;
-
         return new Prediction(
                 bestIndex,
-                label,
+                classMap.label(bestIndex),
                 bestProbability
         );
     }
 
     private void logBarkRelatedScores(
-            float[] logits,
-            List<String> labels
+            float[] logits
     ) {
         System.out.println(
                 "----- Bark-related scores -----"
@@ -135,11 +136,11 @@ public class YamnetPredictionInterpreter {
 
         int scoreCount = Math.min(
                 logits.length,
-                labels.size()
+                classMap.size()
         );
 
         for (int index = 0; index < scoreCount; index++) {
-            String label = labels.get(index);
+            String label = classMap.label(index);
 
             if (!isBarkRelated(label)) {
                 continue;
