@@ -31,6 +31,13 @@ public class OnnxModelRunner {
     private OrtEnvironment environment;
     private OrtSession session;
     private String inputName;
+    private final OnnxScoreExtractor scoreExtractor;
+
+    public OnnxModelRunner(
+            OnnxScoreExtractor scoreExtractor
+    ) {
+        this.scoreExtractor = scoreExtractor;
+    }
 
     @PostConstruct
     public void initialize() throws Exception {
@@ -161,31 +168,8 @@ public class OnnxModelRunner {
         OnnxValue output =
                 findScoresOutput(result);
 
-        Object value = output.getValue();
-
-        if (value instanceof float[] scores) {
-            return scores;
-        }
-
-        if (value instanceof float[][] scores) {
-            if (scores.length == 0) {
-                throw new IllegalStateException(
-                        "Model returned an empty score tensor."
-                );
-            }
-
-            return averageRows(scores);
-        }
-
-        if (value instanceof float[][][] scores) {
-            return averageThreeDimensionalScores(
-                    scores
-            );
-        }
-
-        throw new IllegalStateException(
-                "Unsupported model output type: "
-                        + value.getClass().getName()
+        return scoreExtractor.extract(
+                output.getValue()
         );
     }
 
@@ -199,106 +183,6 @@ public class OnnxModelRunner {
                                         () -> result.get(0)
                                 )
                 );
-    }
-
-    private float[] averageRows(float[][] rows) {
-        if (rows.length == 1) {
-            return rows[0];
-        }
-
-        int classCount = rows[0].length;
-        float[] averages =
-                new float[classCount];
-
-        for (float[] row : rows) {
-            if (row.length != classCount) {
-                throw new IllegalStateException(
-                        "Inconsistent model output dimensions."
-                );
-            }
-
-            for (
-                    int classIndex = 0;
-                    classIndex < classCount;
-                    classIndex++
-            ) {
-                averages[classIndex] +=
-                        row[classIndex];
-            }
-        }
-
-        for (
-                int classIndex = 0;
-                classIndex < classCount;
-                classIndex++
-        ) {
-            averages[classIndex] /=
-                    rows.length;
-        }
-
-        return averages;
-    }
-
-    private float[] averageThreeDimensionalScores(
-            float[][][] values
-    ) {
-        if (values.length == 0) {
-            throw new IllegalStateException(
-                    "Model returned an empty score tensor."
-            );
-        }
-
-        if (values[0].length == 0) {
-            throw new IllegalStateException(
-                    "Model returned no score rows."
-            );
-        }
-
-        int classCount =
-                values[0][0].length;
-
-        float[] averages =
-                new float[classCount];
-
-        int rowCount = 0;
-
-        for (float[][] matrix : values) {
-            for (float[] row : matrix) {
-                if (row.length != classCount) {
-                    throw new IllegalStateException(
-                            "Inconsistent model output dimensions."
-                    );
-                }
-
-                for (
-                        int classIndex = 0;
-                        classIndex < classCount;
-                        classIndex++
-                ) {
-                    averages[classIndex] +=
-                            row[classIndex];
-                }
-
-                rowCount++;
-            }
-        }
-
-        if (rowCount == 0) {
-            throw new IllegalStateException(
-                    "Model returned no score rows."
-            );
-        }
-
-        for (
-                int classIndex = 0;
-                classIndex < classCount;
-                classIndex++
-        ) {
-            averages[classIndex] /=
-                    rowCount;
-        }
-
-        return averages;
     }
 
     private void printModelInformation()
