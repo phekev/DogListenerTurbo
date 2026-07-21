@@ -18,6 +18,11 @@ public class FFTProcessor {
      * @return Power spectrum (257 bins)
      */
     public float[] powerSpectrum(float[] frame) {
+        if (frame == null) {
+            throw new IllegalArgumentException(
+                    "Frame must not be null."
+            );
+        }
 
         if (frame.length != DspConstants.WINDOW_SIZE) {
 

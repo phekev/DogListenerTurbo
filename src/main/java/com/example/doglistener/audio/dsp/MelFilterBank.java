@@ -18,6 +18,11 @@ public class MelFilterBank {
      * @return 64 Mel energies.
      */
     public float[] apply(float[] powerSpectrum) {
+        if (powerSpectrum == null) {
+            throw new IllegalArgumentException(
+                    "Power spectrum must not be null."
+            );
+        }
 
         if (powerSpectrum.length != DspConstants.FFT_BINS) {
             throw new IllegalArgumentException(
