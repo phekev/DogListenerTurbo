@@ -33,6 +33,12 @@ public class MelSpectrogramExtractor {
      */
     public float[][] extract(float[] samples) {
 
+        if (samples == null) {
+            throw new IllegalArgumentException(
+                    "Samples must not be null."
+            );
+        }
+
         if (samples.length != DspConstants.PATCH_SAMPLES) {
 
             throw new IllegalArgumentException(
