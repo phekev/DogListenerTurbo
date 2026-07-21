@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,11 +19,23 @@ public class ClassMap {
     private final List<String> labels;
 
     public ClassMap() {
-        labels = loadLabels();
+        this(openClassMapResource());
+    }
+
+    /*
+     * Package-private constructor for unit tests.
+     *
+     * Production code continues to use the public no-argument
+     * constructor and loads the bundled class-map resource.
+     */
+    ClassMap(InputStream inputStream) {
+        labels = loadLabels(inputStream);
     }
 
     public String label(int classIndex) {
-        if (classIndex < 0 || classIndex >= labels.size()) {
+        if (classIndex < 0
+                || classIndex >= labels.size()) {
+
             return "class-" + classIndex;
         }
 
@@ -33,11 +46,17 @@ public class ClassMap {
         return labels.size();
     }
 
-    private List<String> loadLabels() {
-        InputStream inputStream = getClass()
+    private static InputStream openClassMapResource() {
+        return ClassMap.class
                 .getClassLoader()
-                .getResourceAsStream(CLASS_MAP_RESOURCE);
+                .getResourceAsStream(
+                        CLASS_MAP_RESOURCE
+                );
+    }
 
+    private static List<String> loadLabels(
+            InputStream inputStream
+    ) {
         if (inputStream == null) {
             throw new IllegalStateException(
                     "Could not find "
@@ -52,7 +71,8 @@ public class ClassMap {
                 BufferedReader reader =
                         new BufferedReader(
                                 new InputStreamReader(
-                                        inputStream
+                                        inputStream,
+                                        StandardCharsets.UTF_8
                                 )
                         )
         ) {
@@ -74,6 +94,7 @@ public class ClassMap {
 
                 loadedLabels.add(fields.get(2));
             }
+
         } catch (IOException exception) {
             throw new IllegalStateException(
                     "Failed to load "
@@ -91,9 +112,14 @@ public class ClassMap {
         return List.copyOf(loadedLabels);
     }
 
-    private List<String> parseCsvLine(String line) {
-        List<String> fields = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
+    private static List<String> parseCsvLine(
+            String line
+    ) {
+        List<String> fields =
+                new ArrayList<>();
+
+        StringBuilder current =
+                new StringBuilder();
 
         boolean insideQuotes = false;
 
@@ -101,12 +127,14 @@ public class ClassMap {
              index < line.length();
              index++) {
 
-            char character = line.charAt(index);
+            char character =
+                    line.charAt(index);
 
             if (character == '"') {
                 boolean escapedQuote =
                         insideQuotes
-                                && index + 1 < line.length()
+                                && index + 1
+                                < line.length()
                                 && line.charAt(index + 1)
                                 == '"';
 
@@ -116,6 +144,7 @@ public class ClassMap {
                 } else {
                     insideQuotes = !insideQuotes;
                 }
+
             } else if (character == ','
                     && !insideQuotes) {
 
@@ -124,12 +153,15 @@ public class ClassMap {
                 );
 
                 current.setLength(0);
+
             } else {
                 current.append(character);
             }
         }
 
-        fields.add(current.toString().trim());
+        fields.add(
+                current.toString().trim()
+        );
 
         return fields;
     }
