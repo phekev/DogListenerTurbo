@@ -17,9 +17,7 @@ model:
   input-height: 96
 
 response:
-  first-sound-file: sounds/response-1.wav
-  second-sound-file: sounds/response-2.wav
-  prolonged-sound-file: sounds/response-prolonged.wav
+  sound-directory: "/home/kevin/doglistener-data/sounds"
 
   volume: 1.0
 
@@ -30,3 +28,7 @@ response:
 logging:
   level:
     root: INFO
+
+
+response-history:
+  database-file: /home/kevin/doglistener-data/logs/response-history.db

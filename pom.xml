@@ -77,7 +77,13 @@
     		<artifactId>commons-csv</artifactId>
     		<version>1.13.0</version>
 	</dependency>
-        
+
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.53.1.0</version>
+        </dependency>
+
       <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

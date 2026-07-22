@@ -14,7 +14,7 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 
 @Component
-public class JavaSoundPlayer implements ResponseSoundPlayer {
+public class JavaSoundPlayer {
 
     private static final Logger log =
             LoggerFactory.getLogger(JavaSoundPlayer.class);
@@ -27,7 +27,7 @@ public class JavaSoundPlayer implements ResponseSoundPlayer {
         this.properties = properties;
     }
 
-   @Override
+
 	public synchronized void play(String soundFile) {
 
     stopActiveClip();
