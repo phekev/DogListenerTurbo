@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1">
+
+    <title>Dog Listener</title>
+
+    <link
+            rel="stylesheet"
+            href="/styles.css">
+</head>
+
+<body>
+<header class="page-header">
+    <div>
+        <h1>Dog Listener</h1>
+        <p>Local monitoring dashboard</p>
+    </div>
+
+    <div
+            id="connection-indicator"
+            class="connection-indicator connecting">
+
+        Connecting
+    </div>
+</header>
+
+<main>
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>System status</h2>
+
+            <span id="status-updated">
+                Not yet updated
+            </span>
+        </div>
+
+        <div class="status-grid">
+            <article class="status-item">
+                <span>Application</span>
+                <strong id="application-status">
+                    Unknown
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Detection</span>
+                <strong id="detection-status">
+                    Unknown
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Microphone</span>
+                <strong id="microphone-status">
+                    Unknown
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Uptime</span>
+                <strong id="uptime">
+                    Unknown
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Liveness</span>
+                <strong id="liveness-status">
+                    Unknown
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Readiness</span>
+                <strong id="readiness-status">
+                    Unknown
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Threshold</span>
+                <strong id="confidence-threshold">
+                    —
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Latest confidence</span>
+                <strong id="status-latest-confidence">
+                    —
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Last audio chunk</span>
+                <strong id="last-audio-chunk">
+                    Never
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Last prediction</span>
+                <strong id="last-prediction">
+                    Never
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Prediction age</span>
+                <strong id="prediction-age">
+                    No prediction yet
+                </strong>
+            </article>
+
+            <article class="status-item">
+                <span>Last bark</span>
+                <strong id="last-bark">
+                    Never
+                </strong>
+            </article>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Confidence graph</h2>
+                <p>Most recent ten minutes</p>
+            </div>
+
+            <strong id="current-confidence">
+                —
+            </strong>
+        </div>
+
+        <div class="chart-container">
+            <canvas
+                    id="confidence-chart">
+            </canvas>
+
+            <div
+                    id="confidence-empty"
+                    class="empty-chart">
+
+                Waiting for confidence samples
+            </div>
+        </div>
+    </section>
+    <section class="panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Response timeline</h2>
+                <p>Exact response triggers during the last 24 hours</p>
+            </div>
+
+            <strong id="timeline-count">
+                0 responses
+            </strong>
+        </div>
+
+        <div class="chart-container">
+            <canvas
+                    id="response-timeline-chart">
+            </canvas>
+
+            <div
+                    id="response-timeline-empty"
+                    class="empty-chart">
+
+                No responses during the last 24 hours
+            </div>
+        </div>
+    </section>
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>Response history</h2>
+
+            <span id="history-updated">
+                Not yet updated
+            </span>
+        </div>
+
+        <div class="totals-grid">
+            <article class="total-item">
+                <span>First</span>
+                <strong id="first-total">0</strong>
+            </article>
+
+            <article class="total-item">
+                <span>Second</span>
+                <strong id="second-total">0</strong>
+            </article>
+
+            <article class="total-item">
+                <span>Prolonged</span>
+                <strong id="prolonged-total">0</strong>
+            </article>
+
+            <article class="total-item">
+                <span>Overall</span>
+                <strong id="overall-total">0</strong>
+            </article>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Level</th>
+                    <th>Sound</th>
+                </tr>
+                </thead>
+
+                <tbody id="history-body">
+                <tr>
+                    <td colspan="3">
+                        Loading response history…
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

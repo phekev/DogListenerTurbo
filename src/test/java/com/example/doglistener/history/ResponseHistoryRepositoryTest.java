@@ -272,7 +272,104 @@ class ResponseHistoryRepositoryTest {
                 statistics.overallResponses()
         );
     }
+    @Test
+    void rejectsInvalidTimelineRange() {
+        Instant time =
+                Instant.parse(
+                        "2026-07-22T10:00:00Z"
+                );
 
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> repository.findBetween(
+                        null,
+                        time
+                )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> repository.findBetween(
+                        time,
+                        null
+                )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> repository.findBetween(
+                        time,
+                        time
+                )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> repository.findBetween(
+                        time.plusSeconds(1),
+                        time
+                )
+        );
+    }
+    @Test
+    void returnsTimelineEntriesInAscendingOrder() {
+        repository.record(
+                ResponseLevel.FIRST,
+                sound("before.wav"),
+                Instant.parse(
+                        "2026-07-22T08:59:59Z"
+                )
+        );
+
+        repository.record(
+                ResponseLevel.SECOND,
+                sound("second.wav"),
+                Instant.parse(
+                        "2026-07-22T10:00:00Z"
+                )
+        );
+
+        repository.record(
+                ResponseLevel.PROLONGED,
+                sound("prolonged.wav"),
+                Instant.parse(
+                        "2026-07-22T11:00:00Z"
+                )
+        );
+
+        repository.record(
+                ResponseLevel.FIRST,
+                sound("at-end.wav"),
+                Instant.parse(
+                        "2026-07-22T12:00:00Z"
+                )
+        );
+
+        List<ResponseHistoryEntry> entries =
+                repository.findBetween(
+                        Instant.parse(
+                                "2026-07-22T09:00:00Z"
+                        ),
+                        Instant.parse(
+                                "2026-07-22T12:00:00Z"
+                        )
+                );
+
+        assertEquals(
+                2,
+                entries.size()
+        );
+
+        assertEquals(
+                ResponseLevel.SECOND,
+                entries.get(0).responseLevel()
+        );
+
+        assertEquals(
+                ResponseLevel.PROLONGED,
+                entries.get(1).responseLevel()
+        );
+    }
     @Test
     void rejectsInvalidRecordValues() {
         Path soundFile =

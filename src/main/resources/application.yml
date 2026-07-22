@@ -29,10 +29,13 @@ logging:
   level:
     root: INFO
 
-
 response-history:
   database-file: /home/kevin/doglistener-data/logs/response-history.db
 
   report-enabled: true
   recent-report-limit: 20
   report-time-zone: Europe/Dublin
+
+  server:
+    address: 0.0.0.0
+    port: 8080

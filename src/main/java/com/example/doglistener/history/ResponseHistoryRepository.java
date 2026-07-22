@@ -399,7 +399,82 @@ public class ResponseHistoryRepository {
                 )
         );
     }
+    public List<ResponseHistoryEntry> findBetween(
+            Instant startInclusive,
+            Instant endExclusive
+    ) {
+        if (startInclusive == null) {
+            throw new IllegalArgumentException(
+                    "Start time must not be null."
+            );
+        }
 
+        if (endExclusive == null) {
+            throw new IllegalArgumentException(
+                    "End time must not be null."
+            );
+        }
+
+        if (!startInclusive.isBefore(endExclusive)) {
+            throw new IllegalArgumentException(
+                    "Start time must be before end time."
+            );
+        }
+
+        String sql = """
+            SELECT
+                id,
+                played_at_epoch_ms,
+                response_level,
+                sound_file
+            FROM response_history
+            WHERE played_at_epoch_ms >= ?
+              AND played_at_epoch_ms < ?
+            ORDER BY
+                played_at_epoch_ms ASC,
+                id ASC
+            """;
+
+        List<ResponseHistoryEntry> entries =
+                new ArrayList<>();
+
+        try (
+                Connection connection =
+                        openConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+            statement.setLong(
+                    1,
+                    startInclusive.toEpochMilli()
+            );
+
+            statement.setLong(
+                    2,
+                    endExclusive.toEpochMilli()
+            );
+
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    entries.add(
+                            mapEntry(resultSet)
+                    );
+                }
+            }
+
+        } catch (SQLException exception) {
+            throw new ResponseHistoryException(
+                    "Unable to read response timeline.",
+                    exception
+            );
+        }
+
+        return List.copyOf(entries);
+    }
     private ResponseLevel parseResponseLevel(
             String storedValue
     ) {
